@@ -38,7 +38,7 @@ body, html {
 #DescriptionMemo {
     margin-left:20px;
     float: left;
-    width: 500px;
+    width: 600px;
     height: calc(100vh - 50px);
     overflow-y: auto;
 }
