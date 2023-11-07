@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Map with Brazil Marker</title>
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/d3-geo-projection.v3.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="styles.css">
+
+
+    <style>
+        input[type="range"]::-moz-range-track {
+            background: gray; /* Change the track color for Firefox */
+        }
+        input[type="range"]::-moz-range-thumb {
+            background: black; /* Change the track color for Firefox */
+        }
+    
+    </style>
+
+</head>
+<body style="font-family: Trebuchet MS">
+    <div id="top_div" width=" 100%" font-size="large">
+        <div id="title">From Latin American History 1954-2016
+    </div>
+        </div>
+    <div id="DescriptionMemo"></div>
+    <div id="map"></div>
+    <div id="Filter">
+        <br>
+        <div id="range-sliders">
+            <input type="range" id="lower-bound" min="1954" max="2019" step="1" value="1954" oninput="var str = document.getElementById('range-start').innerHTML = this.value">
+            <input type="range" id="upper-bound" min="1954" max="2019" step="1" value="2019" oninput="var str = document.getElementById('range-end').innerHTML = this.value">
+        </div>
+        <p id="selected-range">Year Range: <span id="range-start">1954</span> - <span id="range-end">2019</span></p>
+
+        <br>
+        <div class="checkboxes">
+            <input class="checkbox_item" type="checkbox" id="checkbox1" name="checkbox1" checked>
+            <img src="icons/1.jpg" alt="Image 1" width=20" height="20">
+            <label for="checkbox1">Key Events</label>
+        </div>
+
+        <div class="checkboxs">
+            <input class="checkbox_item" type="checkbox" id="checkbox2" name="checkbox2" checked>
+            <img src="icons/2.jpg" alt="Image 2" width=20" height="20">
+            <label for="checkbox2">Actors</label>
+        </div>
+        <div class="checkboxes">
+            <input class="checkbox_item" type="checkbox" id="checkbox3" name="checkbox3" checked>
+            <img src="icons/3.jpg" alt="Image 1" width=20" height="20">
+            <label for="checkbox1">Summary</label>
+        </div>
+
+        <div class="checkboxes">
+            <input class="checkbox_item" type="checkbox" id="checkbox4" name="checkbox4" checked>
+            <img src="icons/4.jpg" alt="Image 2" width=20" height="20">
+            <label for="checkbox2">Memorial Initiatives</label>
+        </div>
+        <div class="checkboxes">
+            <input class="checkbox_item" type="checkbox" id="checkbox5" name="checkbox5" checked>
+            <img src="icons/5.jpg" alt="Image 1" width=20" height="20">
+            <label for="checkbox1">Memorial Sites</label>
+        </div>
+
+        <div class="checkboxes">
+            <input class="checkbox_item" type="checkbox" id="checkbox6" name="checkbox6" checked>
+            <img src="icons/6.jpg" alt="Image 2" width=20" height="20">
+            <label for="checkbox2">Organization</label>
+        </div>
+        <div class="checkboxes">
+            <input class="checkbox_item" type="checkbox" id="checkbox7" name="checkbox7" checked>
+            <img src="icons/7.jpg" alt="Image 1" width=20" height="20">
+            <label for="checkbox1">Issues Specific to Country</label>
+        </div>
+
+        <div class="checkboxes">
+            <input class="checkbox_item" type="checkbox" id="checkbox8" name="checkbox8" checked>
+            <img src="icons/8.jpg" alt="Image 2" width=20" height="20">
+            <label for="checkbox2">Types of Events</label>
+        </div>
+        <br>
+        <input id="SearchText" type="text" />
+        <button id="SearchBtn">Search</button>
+
+    </div>
+    
+
+    <div id="popup" class="popup"></div> 
+
+    <script>
+        function buttonClick() {
+            //document.getElementById("DescriptionMemo").innerHTML = PreviousMemoData;
+            keyword = document.getElementById("SearchText").value;
+            document.getElementById("DescriptionMemo").innerHTML = SearchString2(keyword);
+
+        }
+
+        // Adding a click event to the button
+        document.getElementById("SearchBtn").addEventListener("click", buttonClick);
+
+        let PreviousMemoData;
+
+        let globalJsondata; // Declare data as a global variable
+        let CurrentCountryActive;
+        // Function to load and use the JSON data
+        function loadJSON(callback) {
+            fetch('countries.json') // Replace 'data.json' with the path to your JSON file
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then((jsonData) => {
+                    globalJsondata = jsonData; // Assign the loaded JSON data to the global variable
+                    //callback();   // maybe we should uncomment it.
+                })
+                .catch((error) => {
+                    console.error('Error loading JSON:', error);
+                });
+        }
+
+        window.onload = loadJSON();
+
+        const tooltip = d3
+            .select("body")
+            .append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+
+        // Create an SVG container for the map that fills the page
+        const svg = d3.select("#map")
+            .append("svg")
+            .attr("width", 700)
+            .attr("height", window.innerHeight - 70);
+
+        // Load GeoJSON data for CentralSouth
+        d3.json("https://raw.githubusercontent.com/synergy114/Processing/main/SouthCentral.json").then(function (data) {
+            // Create a mercator projection for the map
+            const projection = d3.geoMercator()
+                .fitSize([700, window.innerHeight - 70], data); // Fit data to the container
+
+            // Create a path generator for the map
+            const path = d3.geoPath().projection(projection);
+
+            // Draw the map
+            svg.selectAll("path")
+                .data(data.features)
+                .enter()
+                .append("path")
+                .attr("d", path)
+                .attr("stroke", "gray")
+                .attr("stroke-width", 1)
+                .attr("fill", "lightgray")
+                .on("mouseover", function (d, i) {
+                    d3.select(this).attr("fill", "orange");
+                    tooltip.transition().duration(200).style("opacity", 1);
+                    tooltip
+                        .html(i.properties.admin)
+                        .style("left", d.pageX + "px")
+                        .style("top", d.pageY + "px");
+                })
+                .on("mouseout", function (d, i) {
+                    CurrentCountryActive = d3.select(this);
+                    d3.select(this).attr("fill", "lightgray");
+                    tooltip.transition().duration(500).style("opacity", 0);
+                    //on mouse out hide the icons window
+                    const popup = document.getElementById("popup");
+                    popup.style.display = "none";
+                });
+
+            // Load additional data from countries.json
+            d3.json("countries.json").then(function (countryData) {
+                // Get an array of country names (object keys)
+                const countryNames = Object.keys(countryData);
+
+                // Create a group for the country markers
+                const markers = svg.append("g")
+                    .attr("class", "markers");
+
+                // Create markers using Font Awesome icons within the same projection and translation as the map
+                markers.selectAll("g.marker")
+                    .data(countryNames)
+                    .enter()
+                    .append("image")
+                    .attr('width', 30)
+                    .attr('height', 30)
+                    .attr("xlink:href", 'icons/pin.png')
+                 
+                    .attr("transform", function (d) {
+                        return "translate(" + projection(countryData[d].Loc) + ")";
+                    })
+                    // when user click on the pin
+                    .on("click", function (d, i) {
+                        // Show a popup when a map path is clicked
+                        //const [x, y] = d3.mouse(this);
+                        console.log(d);
+                        console.log(d.pageX + " " + d.pageY)
+                        showPopup(d.pageX, d.pageY, i);
+                    })
+                    .on("mouseover", function (d, i) {
+                        d3.select(this)
+                            .attr('width', 40)
+                            .attr('height', 40);
+                        console.log((this.parentNode.parentNode));
+                        CurrentCountryActive.attr("fill", "orange");
+                        //const targetCountry = data.features.find(feature => feature.properties.name === i);
+                        //console.log(targetCountry);
+                        //if(targetCountry) {
+                        //    svg.append("path")
+                        //        .datum(targetCountry)
+                        //        .attr("d", path)
+                        //        .attr("fill", "orange")
+                                
+                        //}
+
+                        
+                    })
+                    .on("mouseout", function (d, i) {
+                        d3.select(this)
+                            .attr('width', 30)
+                            .attr('height', 30);
+                        CurrentCountryActive.attr("fill", "lightgray");
+                    });
+                    
+
+
+
+               
+                // Create labels for each country
+                markers.selectAll("text")
+                    .data(countryNames)
+                    .enter()
+                    .append("text")
+                    .attr("x", function (d) {
+                        const [longitude, latitude] = countryData[d].Loc;
+                        return projection([longitude, latitude])[0];
+                    })
+                    .attr("y", function (d) {
+                        const [longitude, latitude] = countryData[d].Loc;
+                        return projection([longitude, latitude])[1] - 20; // Adjust the vertical position
+                    })
+               
+            });
+        });
+        //what happens when user clicks pin
+        function showPopup(x, y, country) {
+            const popup = document.getElementById("popup");
+            popup.style.left = (x + 10) + "px";
+            popup.style.top = (y + 10) + "px";
+            popup.innerHTML = "<div class='popup-content'>" + CreatePopoUpMenu(country) + "</div>";
+                popup.style.display = "block";
+        }
+
+        //what happens when user clicks icon in popup window
+        function ImageClick(category) {
+            cat = 0;
+
+            switch (category) {
+                case "Key historical events":
+                    cat = 1;
+                    break;
+                case "Actors":
+                    cat = 2;
+                    break;
+                case "Summary":
+                    cat = 3;
+                    break;
+                case "Memory initiatives":
+                    cat = 4;
+                    break;
+                case "Sites of memory":
+                    cat = 5;
+                    break;
+                case "Organizations":
+                    cat = 6;
+                    break;
+                case "Issues specific to the country":
+                    cat = 7;
+                    break;
+                case "Categories":
+                    cat = 8;
+                    break;
+                default:
+                    cat = 0;
+
+            }
+            return cat;
+        }
+        function iconClick(category, country) {
+            cat = "";
+
+            switch (category) {
+                case 1:
+                    cat = "Key historical events";
+                    break;
+                case 2:
+                    cat = "Actors";
+                    break;
+                case 3:
+                    cat = "Summary";
+                    break;
+                case 4:
+                    cat = "Memory initiatives";
+                    break;
+                case 5:
+                    cat = "Sites of memory";
+                    break;
+                case 6:
+                    cat = "Organizations";
+                    break;
+                case 7:
+                    cat = "Issues specific to the country";
+                    break;
+                case 8:
+                    cat = "Categories";
+                    break;
+                default:
+                    cat = "";
+            
+            }
+
+            //alert("Icon " + iconNumber + " clicked!");
+            document.getElementById("DescriptionMemo").innerHTML = "<h3>"+country+" : "+cat+"</h3><br>" + Func(country,cat);
+        }
+
+        function CreatePopoUpMenu(country) {
+            r = "";
+            //fetch("countries.json")
+            //   .then(response => response.json())
+            //   .then((data) => {
+            for (const key in globalJsondata[country]) {
+                cat = key;
+                if (cat == "Loc")
+                    continue;
+                    //r = "";
+                for (const key in globalJsondata[country][cat]) {
+                    n = ImageClick(cat);
+                    if (document.getElementById("checkbox" + n).checked)
+                        r += "<img class='popupimage' src='icons/" + n + ".jpg' width='20' height='20' onclick='iconClick(" + n + ", \"" + country + "\")'>";
+                    break;
+                }
+             }
+            console.log("r = " + r);
+            return r;
+        }
+
+        function Func(country, cat) {
+            r = "";
+            keyword = document.getElementById("SearchText").value;
+            //fetch("countries.json")
+            //   .then(response => response.json())
+            //   .then((data) => {
+            for (const key in globalJsondata[country]) {
+                if (key == cat) {
+                    //r = "";
+                    for (const key in globalJsondata[country][cat]) {
+                         value = globalJsondata[country][cat][key];
+                        if (key.length > 2)
+                        {
+                            if (cat == "Key historical events") {
+                                v = parseInt(key[0] + key[1] + key[2] + key[3]);
+                                low = document.getElementById("lower-bound").value;
+                                high = document.getElementById("upper-bound").value; 
+                                if (v >= low && v <= high)
+                                    r += SearchString(" <p>" + ("<b>" + key + " : " + "</b><br> " + value) + "</p><Br> ",keyword);
+                            }
+                            else if (cat == "Memory initiatives") {
+                                    v = parseInt(key[key.length - 5] + key[key.length - 4] + key[key.length - 3] + key[key.length - 2]);
+                                if (v == "NaN")
+                                    r += SearchString(" <p>" + ("<b>" + key + " : " + "</b><br> " + value) + "</p><Br> ",keyword);
+                                else {
+                                    low = document.getElementById("lower-bound").value;
+                                    high = document.getElementById("upper-bound").value;
+                                    if (v >= low && v <= high)
+                                        r += SearchString(" <p>" + ("<b>" + key + " : " + "</b><br> " + value) + "</p><Br> ",keyword);
+                                }
+                            }
+                            else
+                                r += SearchString(" <p>" + ("<b>" + key + " : " + "</b><br> " + value) + "</p><Br> ",keyword);
+                        }
+                            else
+                            r += SearchString(" <p>" + ("</b>" + value) + "</p><Br> ",keyword);
+                        //console.log(r);
+                    }
+                    if (cat == "Key historical events") {
+                        s = country.replace(' ', '');
+                        r += "<div class='image-container'><img class='Detailimage' alignment='center' src='images/" + s + "01.jpg' width='340' ></div>";
+
+                    }
+                    else if (cat == "Memory initiatives") {
+                        s = country.replace(' ', '');
+                        r += "<div class='image-container'><img class='Detailimage' alignment='center'  src='images/" + s + "02.jpg' width='340' ></div>";
+
+                    }
+                    break;
+                }
+            }
+            // })
+            //document.getElementById("txt").innerHTML =
+            //  (data[country]["Key historical events"][0]))
+
+            //    .catch(error => {
+            //        return "Error fetching data: " + error;
+            //    });
+            console.log("r = " + r);
+            return r;
+        }
+        function SearchString(maintext, keyword) {
+            keyword = keyword.trim();
+
+            if (keyword.length == 0)
+                return maintext;
+
+
+            //remove the red words
+            {
+                var searchMask = 'red';
+                var regEx = new RegExp(searchMask, "ig");
+                var replaceMask = "black";
+
+                maintext = maintext.replace(regEx, replaceMask);
+            }
+
+
+            
+            if (maintext.indexOf(keyword) != -1) {
+                
+                var searchMask = keyword;
+                var regEx = new RegExp(searchMask, "ig");
+                var replaceMask = "<font color='red' background-color='lightgray'> " + keyword + "</font >";
+
+                return maintext.replace(regEx, replaceMask);
+            }
+            else
+                return maintext;
+        }
+        function SearchString2(keyword) {
+            keyword = keyword.trim();
+
+            if (keyword.length == 0)
+                return "";
+            r = "";
+            tempr = "";
+            AvailableCat = false;
+            AvailableCountry = false;
+            key = "";
+            value = "";
+
+            for (country in globalJsondata) {
+                tempr = "";
+                AvailableCountry = false;
+                AvailableCat = false;
+                for (const cat in globalJsondata[country]) {
+                    AvailableCat = false;
+                    if (cat == "Loc")
+                        continue;
+                    for (const key in globalJsondata[country][cat]) {
+                        value = globalJsondata[country][cat][key];
+
+                        if ((key.indexOf(keyword) >= 0) || (value.indexOf(keyword) >= 0)) {
+                            
+                            AvailableCat = true;
+                            if(key.length > 2)
+                                tempr += " <p>" + "<b>" + SearchString(key, keyword) + " : " + "</b><br> " + SearchString(value, keyword) + "</p><Br> ";
+                            else
+                                tempr += " <p>" + SearchString(value, keyword) + "</p>";
+                        }
+                    }
+                    if (AvailableCat == true)
+                    {
+                        AvailableCountry = true;
+                        tempr = "<h3>" + cat + ":</h3><br>" + tempr ;
+                    }
+                }
+                if (AvailableCountry == true)
+                    tempr = "<h2>" + country + "</h2><br>" + tempr;
+                r += tempr;
+                            
+            }
+            return r;
+        }
+        
+    </script>
+</body>
+</html>

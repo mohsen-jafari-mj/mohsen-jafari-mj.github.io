@@ -1,0 +1,27 @@
+
+.tooltip {
+    position: absolute;
+    text-align: center;
+    background-color: #fff;
+    color: #000000;
+    padding: 5px;
+    border-radius: 3px;
+    pointer-events: none;
+    z-index: 4;
+}
+.popup {
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ccc;
+    padding: 5px;
+    z-index: 1;
+    display: none;
+    z-index: 5;
+}
+
+.popupimage {
+    transition: transform .2s;
+}
+    .popupimage:hover {
+        transform: scale(1.5);
+    }
