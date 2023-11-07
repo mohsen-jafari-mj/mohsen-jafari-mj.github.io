@@ -48,7 +48,7 @@
         "Issues specific to the country": []
     },
     "Ecuador": {
-        "Loc": [-81, 3.6],
+        "Loc": [-81, 2.6],
         "Categories": [
             "Coup",
             " reparation law",
@@ -89,7 +89,7 @@
         "Issues specific to the country": []
     },
     "El Salvador": {
-        "Loc": [-91, 18.5],
+        "Loc": [-91, 17.5],
         "Categories": [
             "Internal armed conflict",
             " coup",
@@ -139,7 +139,7 @@
         "Issues specific to the country": []
     },
     "Panama": {
-        "Loc": [-83, 13],
+        "Loc": [-83, 12],
         "Categories": [
             "Dictatorship",
             " coup",
@@ -423,7 +423,7 @@
         "Issues specific to the country": []
     },
     "Chile": {
-        "Loc": [-73, -29],
+        "Loc": [-72.5, -29],
         "Categories": [
             "Dictatorship",
             " coup",
@@ -517,7 +517,7 @@
         "Issues specific to the country": []
     },
     "Paraguay": {
-        "Loc": [-60, -19],
+        "Loc": [-60, -20],
         "Categories": [
             "Dictatorship",
             " coup",
