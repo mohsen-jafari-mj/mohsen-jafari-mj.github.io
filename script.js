@@ -6,7 +6,7 @@ let slideIndex = 1;
 const slideshowContainer = document.getElementById("slideshow-container");
 for (let i = 1; i <= imageCount; i++) {
     const image = new Image();
-    image.src = `${imagesFolder}Image${i}.jpg`;
+    image.src = `${imagesFolder}image${i}.jpg`;
     image.className = "mySlides";
     image.width = 300;
     image.height = 200;
