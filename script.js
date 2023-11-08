@@ -8,8 +8,9 @@ for (let i = 1; i <= imageCount; i++) {
     const image = new Image();
     image.src = `${imagesFolder}image${i}.jpg`;
     image.className = "mySlides";
-    image.width = 300;
-    image.height = 200;
+    //image.width = 300;
+    //image.height = 200;
+
     slideshowContainer.appendChild(image);
 }
 

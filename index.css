@@ -110,13 +110,18 @@ input[type="checkbox"] {
     display: flex;
     align-items: center;
     
-    width: 360px;
+    width: 380px;
+}
+.mySlides {
+    max-width: 100%; /* Set the maximum width */
+    max-height: 100%;
+    
 }
 .slideshow-container {
     padding: 10px;
     display: inline-block;
-    height: 300px; /* Set the width to 30% of the viewport width */
-    max-width: 300px; /* Adjust the maximum width as needed */
+    height: 200px; /* Set the width to 30% of the viewport width */
+    width: 300px; /* Adjust the maximum width as needed */
     display: flex;
     align-items: center;
     
