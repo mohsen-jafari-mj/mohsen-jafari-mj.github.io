@@ -110,7 +110,7 @@ input[type="checkbox"] {
     display: flex;
     align-items: center;
     
-    width: 380px;
+    width: 370px;
 }
 .mySlides {
     max-width: 100%; /* Set the maximum width */
