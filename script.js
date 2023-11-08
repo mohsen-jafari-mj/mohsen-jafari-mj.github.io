@@ -1,4 +1,4 @@
-const imageCount = 14;
+const imageCount = 30;
 const imagesFolder = "image/";
 let slideIndex = 1;
 

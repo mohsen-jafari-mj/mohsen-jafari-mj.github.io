@@ -122,7 +122,13 @@
             }
         });
 
-
+        document.getElementById("SearchText")
+        .addEventListener("keyup", function (event) {
+            event.preventDefault();
+            if (event.keyCode === 13) {
+                document.getElementById("SearchBtn").click();
+            }
+        });
 
         function buttonClick() {
             //document.getElementById("DescriptionMemo").innerHTML = PreviousMemoData;
@@ -418,12 +424,12 @@
                             r += SearchString(" <p>" + ("</b>" + value) + "</p><Br> ", keyword);
                         //console.log(r);
                     }
-                    if (cat == "Key historical events") {
+                    if (cat == "Key historical events" && r.length > 0) {
                         s = country.replace(' ', '');
                         r += "<div class='image-container'><img class='Detailimage' alignment='center' src='images/" + s + "01.jpg' width='340' ></div>";
 
                     }
-                    else if (cat == "Memory initiatives") {
+                    else if (cat == "Memory initiatives" && r.length > 0) {
                         s = country.replace(' ', '');
                         r += "<div class='image-container'><img class='Detailimage' alignment='center'  src='images/" + s + "02.jpg' width='340' ></div>";
 
