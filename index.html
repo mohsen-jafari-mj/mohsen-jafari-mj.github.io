@@ -497,20 +497,21 @@
                     if (cat == "Loc")
                         continue;
                     for (const key in globalJsondata[country][cat]) {
+                        tempcat="";
                         value = globalJsondata[country][cat][key];
 
                         if ((key.indexOf(keyword) >= 0) || (value.indexOf(keyword) >= 0)) {
 
                             AvailableCat = true;
                             if (key.length > 2)
-                                tempr += " <p>" + "<b>" + SearchString(key, keyword) + " : " + "</b><br> " + SearchString(value, keyword) + "</p><Br> ";
+                                tempcat += " <p>" + "<b>" + SearchString(key, keyword) + " : " + "</b><br> " + SearchString(value, keyword) + "</p><Br> ";
                             else
-                                tempr += " <p>" + SearchString(value, keyword) + "</p>";
+                                tempcat += " <p>" + SearchString(value, keyword) + "</p>";
                         }
                     }
                     if (AvailableCat == true) {
                         AvailableCountry = true;
-                        tempr = "<h3>" + cat + ":</h3><br>" + tempr;
+                        tempr += "<h3>" + cat + ":</h3><br>" + tempcat;
                     }
                 }
                 if (AvailableCountry == true)
