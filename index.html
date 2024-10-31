@@ -177,7 +177,8 @@
             .attr("height", window.innerHeight - 70);
 
         // Load GeoJSON data for CentralSouth
-        d3.json("https://raw.githubusercontent.com/synergy114/Processing/main/SouthCentral.json").then(function (data) {
+        //d3.json("https://raw.githubusercontent.com/synergy114/Processing/main/SouthCentral.json").then(function (data) {
+        d3.json("south-america.json").then(function (data) {
             // Create a mercator projection for the map
             const projection = d3.geoMercator()
                 .fitSize([700, window.innerHeight - 70], data); // Fit data to the container
